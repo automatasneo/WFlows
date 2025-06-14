@@ -1,0 +1,669 @@
+{
+  "name": "Copia workflow nate herks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🎬 Automatización de Videografía de Productos con IA\n\n**¿Qué hace este workflow?**\nEste sistema automatiza completamente la creación de contenido visual profesional:\n1. **Formulario web** - Los usuarios suben foto, título y descripción del producto\n2. **IA optimiza prompts** - Crea prompts profesionales para fotografía de estudio\n3. **Edición de imagen** - OpenAI mejora la foto original con calidad profesional\n4. **Hosting público** - ImageBB convierte la imagen en URL pública\n5. **Generación de video** - Runway ML crea video 3D rotatorio de 10 segundos\n6. **Entrega automática** - Gmail envía los materiales finales\n\n**Casos de uso:**\n- E-commerce y marketing de productos\n- Agencias de publicidad\n- Creadores de contenido\n- Automatización de materiales promocionales",
+        "height": 480,
+        "width": 700,
+        "color": 4
+      },
+      "id": "7910fe84-41c2-4411-b26f-6f894f12808c",
+      "name": "Nota Introductoria",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1740,
+        -680
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "formTitle": "Go to Market",
+        "formDescription": "Give us a product photo, title, and description, and we'll get back to you with professional marketing materials.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Product Photo",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".jpg,.jpeg,.png",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Product Title",
+              "placeholder": "Toothpaste",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Product Description",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "name@example.com",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "501c6325-cd9d-458b-8af9-8de75ae7442b",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        -780,
+        -360
+      ],
+      "webhookId": "product-form-uuid",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "content": "## 📋 Formulario de Productos\n\n**Campos requeridos:**\n- Foto del producto (JPG/PNG)\n- Título del producto\n- Descripción detallada\n- Email para recibir materiales\n\n**Datos capturados:**\n- Binary data de la imagen\n- Información del producto\n- Email de contacto",
+        "height": 560,
+        "width": 350,
+        "color": 7
+      },
+      "id": "3be8bd67-a2f1-4662-96dd-db70e736c2f2",
+      "name": "Nota Formulario",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -940,
+        -680
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "Product Photo",
+        "name": "={{ $json['Product Title'] }} (original)",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "product_creatives_folder_id"
+        },
+        "options": {}
+      },
+      "id": "bb2a8727-e0a7-4079-be56-f44307af1023",
+      "name": "Upload Photo",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -420,
+        -360
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "content": "## ☁️ Subida a Google Drive\n\n**Configuración requerida:**\n- Conectar credenciales de Google Drive\n- Crear carpeta 'Product Creatives'\n\n**Función:**\n- Guarda imagen original con nombre dinámico\n- Permite referencia posterior para descarga\n- Formato: '[Título Producto] (original)'",
+        "height": 560,
+        "width": 380,
+        "color": 2
+      },
+      "id": "c5544721-f26c-45ac-beb7-e210c91fea6f",
+      "name": "Nota Google Drive",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -560,
+        -680
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Product: {{ $('On form submission').item.json['Product Title'] }}\nDescription: {{ $('On form submission').item.json['Product Description'] }}",
+        "options": {
+          "systemMessage": "You are a professional product photography prompt expert. Create detailed, technical prompts for high-end studio product photography that will be used with AI image generation.\n\nYour prompts should include:\n- Hyperrealistic photography specifications\n- Professional studio lighting details\n- Camera and lens specifications\n- Background and composition elements\n- Material and texture descriptions\n- Brand positioning elements\n\nAlways output prompts that would create premium, commercial-quality product images suitable for marketing materials."
+        }
+      },
+      "id": "1e00e498-946a-4e45-a156-956703ee6f94",
+      "name": "Image Prompt",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -40,
+        -360
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o"
+        },
+        "options": {}
+      },
+      "id": "7e7c0e26-7fa6-4d12-ac37-388206d17c7f",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -60,
+        -200
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "OkbJPxq5uaiKVyna",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 Generador de Prompts IA\n\n**Configuración requerida:**\n- Añadir credenciales de OpenAI\n- Modelo recomendado: GPT-4o\n\n**Función:**\n- Analiza título y descripción del producto\n- Genera prompts optimizados para fotografía profesional\n- Incluye especificaciones técnicas de estudio\n- Optimizado para calidad comercial",
+        "height": 570,
+        "width": 500,
+        "color": 5
+      },
+      "id": "f5f71917-6b7d-4740-8ef1-6c84266848f0",
+      "name": "Nota IA Prompts",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -160,
+        -680
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Upload Photo').item.json.id }}"
+        },
+        "options": {}
+      },
+      "id": "a66f6689-fd33-4b7e-a12d-49714cbce90c",
+      "name": "Download File",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        480,
+        -360
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "content": "## 📥 Descarga para Procesamiento\n\n**¿Por qué descargar si acabamos de subir?**\n- Los datos binarios del formulario no se pueden referenciar en nodos distantes\n- Necesitamos el archivo como binary data para OpenAI\n- Este patrón permite referencia cruzada en el workflow",
+        "height": 580,
+        "width": 340,
+        "color": 4
+      },
+      "id": "f2239dd0-4aa1-44d1-92a4-1bdd9dd66d35",
+      "name": "Nota Descarga",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        360,
+        -680
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $('Image Prompt').item.json.output }}"
+            },
+            {
+              "name": "model",
+              "value": "dall-e-2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c2e4ab97-c0f8-4ed2-a0d9-48fad3d1d8f5",
+      "name": "Create Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        820,
+        -360
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "00c3e3d6-74d6-4345-84f8-7900bc88be8c",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        1000,
+        -360
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "## 🎨 Edición Profesional de Imagen\n\n**Proceso OpenAI Image Edit:**\n1. Recibe imagen original + prompt optimizado\n2. DALL-E 2 mejora la imagen profesionalmente\n3. Mantiene características del producto original\n4. Aplica iluminación y composición de estudio\n5. Convierte base64 a archivo binario\n\n**Configuración:** Credenciales OpenAI requeridas\n**Costo aproximado:** $0.05 por imagen",
+        "height": 580,
+        "width": 450,
+        "color": 6
+      },
+      "id": "a372a3e4-e00c-44c9-bd28-2f17ecc4b2f2",
+      "name": "Nota Edición Imagen",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        -680
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.imgbb.com/1/upload",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpQueryAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f83cd519-c1f3-4762-b19a-93053685ccb6",
+      "name": "Get URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -800,
+        400
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": "## 🌐 Hosting Público con ImageBB\n\n**Configuración requerida:**\n- Crear cuenta gratuita en imgbb.com\n- Obtener API key\n- Configurar como Query Auth en n8n\n\n**¿Por qué necesario?**\n- Runway ML requiere URL pública de imagen\n- ImageBB convierte binary data a URL accesible\n- Servicio gratuito y confiable",
+        "height": 690,
+        "width": 360,
+        "color": 3
+      },
+      "id": "ba7bcdf3-90bd-4a65-9566-84504c524f29",
+      "name": "Nota ImageBB",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -940,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.runwayml.com/v1/image_to_video",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Runway-Version",
+              "value": "2024-11-06"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"promptImage\": \"{{ $('Get URL').item.json.data.url }}\",\n  \"model\": \"gen3a_turbo\",\n  \"promptText\": \"Slow 360-degree rotation of the product with professional studio lighting. Smooth camera movement around the product showcasing all angles. High-end commercial video style with subtle lighting changes and premium presentation.\",\n  \"duration\": 10,\n  \"ratio\": \"1:1\"\n}",
+        "options": {}
+      },
+      "id": "d6674986-2567-4283-865d-49c7ad6cb140",
+      "name": "Generate Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -420,
+        400
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "id": "17f8eaed-958a-4307-a568-70644bd8f87e",
+      "name": "60 Seconds",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        -220,
+        400
+      ],
+      "webhookId": "wait-60s-webhook-uuid",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "=https://api.runwayml.com/v1/tasks/{{ $('Generate Video').item.json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Runway-Version",
+              "value": "2024-11-06"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ce60f17d-8e90-4193-8a36-93240ff1cc40",
+      "name": "Get Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -20,
+        400
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "status-check-uuid",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "RUNNING"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9a4e2d33-3e0e-4da7-93c0-0274499ee7eb",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        160,
+        400
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {},
+      "id": "5cf23d41-c8fb-42fa-a34a-e0847e99841f",
+      "name": "5 Secs",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        180,
+        140
+      ],
+      "webhookId": "wait-5s-webhook-uuid",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "## 🎬 Generación de Video con Runway ML\n\n**Configuración requerida:**\n- Crear cuenta en runwayml.com\n- Obtener API key de Runway\n- Configurar como Header Auth: 'Authorization: Bearer [API_KEY]'\n\n**Proceso de polling:**\n1. Envía imagen + prompt a Runway (Gen3a Turbo)\n2. Espera 60 segundos inicial\n3. Verifica estado cada 5 segundos si aún está procesando\n4. Continúa hasta completar\n\n**Especificaciones video:**\n- Duración: 10 segundos\n- Formato: 1:1 (cuadrado)\n- Estilo: Rotación 360° profesional\n\n**Costo:** ~$0.50 por video de 10 segundos",
+        "height": 690,
+        "width": 1100,
+        "color": 5
+      },
+      "id": "b82b6cf8-139a-44c0-a32f-489a5747a8fa",
+      "name": "Nota Runway ML",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -560,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Email'] }}",
+        "subject": "Marketing Materials: {{ $('On form submission').item.json['Product Title'] }}",
+        "emailType": "text",
+        "message": "=Here are the requested marketing materials for your {{ $('On form submission').item.json['Product Title'] }}.\n\nProfessional Photo: {{ $('Get URL').item.json.data.url }}\n\nProfessional Video: {{ $('Get Video').item.json.output[0] }}\n\nCheers!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "e7cd94d9-f6f3-433b-ae12-b7afbc93abad",
+      "name": "Send Finished Products",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        740,
+        420
+      ],
+      "webhookId": "gmail-webhook-uuid",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "## 📧 Entrega de Materiales Finales\n\n**Configuración requerida:**\n- Conectar credenciales de Gmail\n- Verificar que appendAttribution esté en 'false'\n\n**Contenido del email:**\n- Asunto personalizado con nombre del producto\n- Enlaces directos a foto y video profesionales\n- Formato de texto simple y claro\n\n**URLs incluidas:**\n- Imagen mejorada (desde ImageBB)\n- Video rotatorio (desde Runway ML)",
+        "height": 680,
+        "width": 610,
+        "color": 2
+      },
+      "id": "a832a7de-9148-4225-904e-c5db3bc63c2a",
+      "name": "Nota Email Final",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## ⚙️ Configuración Completa del Sistema\n\n**APIs y Servicios Requeridos:**\n\n1. **OpenAI** (openai.com)\n   - Para IA de prompts y edición de imágenes\n   - Crear API key en platform.openai.com\n   - Configurar como 'OpenAI API' en n8n\n\n2. **Google Drive + Gmail**\n   - Habilitar APIs en Google Cloud Console\n   - Configurar OAuth 2.0 para n8n\n   - Crear carpeta 'Product Creatives'\n\n3. **ImageBB** (imgbb.com)\n   - Cuenta gratuita para hosting de imágenes\n   - Configurar como Query Auth con parámetro 'key'\n\n4. **Runway ML** (runwayml.com)\n   - Para generación de videos con IA\n   - Configurar como Header Auth: 'Authorization: Bearer [KEY]'\n\n**Costos aproximados por ejecución:**\n- OpenAI Image Edit: ~$0.05\n- Runway ML Video (10s): ~$0.50\n- Google Drive + ImageBB: Gratuito\n- **Total: ~$0.55 por producto**",
+        "height": 650,
+        "width": 600,
+        "color": 2
+      },
+      "id": "8f9f2755-d06a-4dd0-a973-5019049c1f2a",
+      "name": "Configuración del Sistema",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1740,
+        -140
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Upload Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Photo": {
+      "main": [
+        [
+          {
+            "node": "Image Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Image Prompt",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Prompt": {
+      "main": [
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "Create Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Image": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Get URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get URL": {
+      "main": [
+        [
+          {
+            "node": "Generate Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video": {
+      "main": [
+        [
+          {
+            "node": "60 Seconds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "60 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "5 Secs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Finished Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5 Secs": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "77c6aabc-6553-4a0d-a23f-9eacef4920d6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9d8747a358c6ef7f467b6ae415e9e8b134cc3cfbb4ead13516b19d9211ae0b58"
+  },
+  "id": "lqg0930ZPZMOhP8q",
+  "tags": []
+}
